@@ -218,7 +218,7 @@ const fetchVideos = function(searchTerm, callback) {
   };
   $.getJSON(BASE_URL,query,callback);
 };
-
+//fetchVideos('batman', response => console.log(response));
 // TASK:
 // 1. Create a `decorateResponse` function that receives the Youtube API response
 // 2. Map through the response object's `items` array
@@ -235,20 +235,21 @@ const decorateResponse = function (response) {
       thumbnail:item.snippet.thumbnails.default.url,
     };
   });
-  addVideosToStore(decoratedResponse);	
-  render();
-  return decoratedResponse;
-  
 };
 
-console.log(decorateResponse(mockData));
 
 // TASK:
 // 1. Create a `generateVideoItemHtml` function that receives the decorated object
 // 2. Using the object, return an HTML string containing all the expected data
 // TEST IT!
 const generateVideoItemHtml = function (video) {
+  return `
+     <li data-video-id="${video.id}">
+            <h3>${video.title}</h3>
+            <img src="${video.thumbnail}"/>
 
+        </li>
+        `;
 };
 
 // TASK:
@@ -256,17 +257,27 @@ const generateVideoItemHtml = function (video) {
 // objects and sets the array as the value held in store.videos
 // TEST IT!
 const addVideosToStore = function (videos) {
-
+  console.log(videos);
+  store.videos = videos;
 };
-
+//const decorated = decorateResponse(mockData);
+//console.log(addVideosToStore(decorated));
 // TASK:
 // 1. Create a `render` function
 // 2. Map through `store.videos`, sending each `video` through your `generateVideoItemHtml`
 // 3. Add your array of DOM elements to the appropriate DOM element
 // TEST IT!
-const render = function () {
-
+const render = function() {
+  console.log(store);
+  const html = store.videos.map(video => generateVideoItemHtml(video));
+  console.log(html);
+  $('.results').html(html.join(''));
 };
+
+//const decorated = decorateResponse(mockData);
+//addVideosToStore(decorated);
+
+//render();
 
 // TASK:
 // 1. Create a `handleFormSubmit` function that adds an event listener to the form
@@ -280,11 +291,17 @@ const render = function () {
 //   g) Inside the callback, run the `render` function 
 // TEST IT!
 const handleFormSubmit = function () {
-  $('#search-videos').on('submit',event=>{
+  $('.js-search-form').on('submit', event =>{
     event.preventDefault();
-    const userSearch=$('#search-term').val();
+    console.log('something was pressed');
+    
+    const searchTerm = $('#search-term').val(); 
     $('#search-term').val('');
-    fetchVideos(userSearch,decorateResponse);
+    console.log(searchTerm);
+    fetchVideos(searchTerm, response => {
+      addVideosToStore(decorateResponse(response));
+      render();
+    });
   });
 };
 
